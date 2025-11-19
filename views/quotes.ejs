@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Quotes</title>
+</head>
+
+<body>
+    <%- include('partials/header.ejs')%>
+        <div class="container" style="width: 80vh;">
+            <div class="row row-cols-2 p-2 border border-body rounded shadow justify-content-center">
+                <% for (let quote of quotes) {%>
+                    <div class="col-auto flex-fill text-center border border-danger rounded shadow p-2 m-1">
+                        <div class="col-auto">
+                            <h6><%=quote.quoteId%></h6><p><%=quote.quote%></p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="/updateQuote?quoteId=<%=quote.quoteId%>">Update</a>
+                            <a href="/deleteQuote?quoteId=<%=quote.quoteId%>">Delete</a>
+                        </div>
+                    </div>
+                <%}%>
+                    
+            </div>
+        </div>
+    <%- include('partials/footer.ejs')%>   
+</body>
+
+</html>

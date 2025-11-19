@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Update Quote</title>
+</head>
+
+<body>
+    <%- include('partials/header.ejs')%>
+    <div class="container" style="width: 80vh">
+        <form class="card m-2 p-2" id="addQuoteForm" action="/addQuote" method="POST">
+            <h1> Add New Quote: </h1>
+            <div class="">
+                <div class="row m-1 justify-content-center">
+                    <div class="col-auto flex-fill border border-body rounded m-1 p-1">
+                        <label for="quote">New Quote: <textarea name="quote" id="quote"><%=quoteInfo[0].quote%></textarea></label>
+                    </div>
+                    <div class="col-auto flex-fill border border-body rounded m-1 p-2">
+                        <label for="authorId">Quote Author:
+                            <select name="authorId" id="authorId">
+                                <%for(let row of rowsAuthors){%>
+                                    <option value="<%=row.authorId%>"
+                                        <%= row.authorId == quoteInfo[0].authorId ? "selected" : "" %>
+                                    >
+                                        <%=row.authorId%> - <%=row.firstName%>
+                                                <%=row.lastName%>
+                                    </option>
+                                    <%}%>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div class="row m-1 justify-content-center">
+                    <div class="col-auto flex-fill border border-body rounded m-1 p-2">
+                        <label for="category">Quote Category:
+                            <select name="category" id="category">
+                                <%for(let row of rowsCategories){%>
+                                    <option value="<%=row.category%>"
+                                        <%= row.category == quoteInfo[0].category ? "selected" : "" %>>
+                                        <%=row.category%>
+                                    </option>
+                                    <%}%>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="col-auto flex-fill border border-body rounded m-1 p-2">
+                        <label for="likes">Quote Likes: <input type="number" name="likes" id="likes" min="0"
+                                max="10000" value="<%=quoteInfo[0].likes%>"></label>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col"><button>Add Quote</button></div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <%- include('partials/footer.ejs')%>  
+    <script>
+        // document.querySelector("#addQuoteForm").addEventListener('submit', validateKeyword);
+
+        // function validateKeyword() {
+        //     let quote = document.querySelector('#quote').value;
+        //     if (!(quote.length > 4)) {
+        //         event.preventDefault();
+        //         alert('Quote must be 5 or more characters!');
+        //     }
+
+        // }
+        console.log(error)
+        let errorArea = document.querySelector('#error')
+        errorArea.style.display = 'none'
+        if(error != ''){
+            errorArea.style.display = 'block'
+        }
+    </script>
+
+</body>
+
+</html>
