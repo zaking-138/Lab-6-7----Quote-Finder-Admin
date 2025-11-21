@@ -10,7 +10,8 @@
 </head>
 
 <body>
-    <%- include('partials/header.ejs')%>    
+    <%- include('partials/header.ejs')%> 
+    <%-include('partials/nav.ejs')%>   
     <div class="container" style="width: 80vh">
         <form class="card d-flex m-2 p-2" name="addAuthorForm" id="addAuthorForm" action="/addAuthor" method="POST">
             <h1> Add New Author: </h1>

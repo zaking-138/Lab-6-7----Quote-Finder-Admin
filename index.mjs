@@ -1,7 +1,16 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
+import session from 'express-session';
 
 const app = express();
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+  secret: 'cst336',
+  resave: false,
+  saveUninitialized: true,
+//   cookie: { secure: true } // Only works in web servers.
+}))
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -23,11 +32,50 @@ const [rowsAuthors] = await pool.query('SELECT authorId, firstName, lastName FRO
 const [rowsCategories] = await pool.query('SELECT DISTINCT category FROM `quotes`')
 //routes
 app.get('/', (req, res) => {
-    res.render('home.ejs')
+    res.render('login.ejs')
+});
+app.post('/attemptLogin', async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    let match = false;
+
+    let sql = 'SELECT * FROM users WHERE username = ?'
+    const [rows] = await pool.query(sql, [username]);
+    if(rows.length > 0){
+        let hashedPW = rows[0].password;
+        match = await bcrypt.compare(password, hashedPW);
+    }
+
+    if(match){
+        req.session.isUserAuthenticated = true;
+        req.session.fullName = `${rows[0].firstName} ${rows[0].lastName}`
+        console.log(`${rows[0].firstName} ${rows[0].lastName} logged in.`)
+        res.redirect('/home')
+    }else{
+        res.render('login.ejs', {"loginError":"Wrong Credentials!"})
+    }
+});
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+//middleware functions.
+function isUserAuthenticated(req, res, next){
+    if(req.session.isUserAuthenticated){
+        next()
+    }else{
+        res.redirect('/')
+    }
+}
+
+app.get('/home', isUserAuthenticated, (req, res) => {
+    let name = req.session.fullName;
+    res.render('home.ejs', {name})
 });
 
 // Display form to add a new author to the database.
-app.get('/addAuthor', (req, res) => {
+app.get('/addAuthor', isUserAuthenticated, (req, res) => {
     res.render('addAuthor.ejs')
 })
 
@@ -51,7 +99,7 @@ app.post('/addAuthor', async (req, res) => {
     res.render('addAuthor.ejs')
 })
 
-app.get('/addQuote', async (req, res) => {
+app.get('/addQuote', isUserAuthenticated, async (req, res) => {
     let error = ''
     res.render('addQuote.ejs', { rowsAuthors, rowsCategories, error })
 })
@@ -78,7 +126,7 @@ app.post('/addQuote', async (req, res) => {
     res.render('addQuote.ejs', { rowsAuthors, rowsCategories, error })
 })
 
-app.get('/authors', async (req, res) =>{
+app.get('/authors', isUserAuthenticated, async (req, res) =>{
     let sql = `SELECT authorId, firstName, lastName
                 FROM authors
                 ORDER BY lastName`
@@ -86,7 +134,7 @@ app.get('/authors', async (req, res) =>{
     res.render('authors.ejs', {authors})
 })
 
-app.get('/updateAuthor', async(req, res) =>{
+app.get('/updateAuthor', isUserAuthenticated, async(req, res) =>{
     let authorId = req.query.authorId
     console.log(authorId)
     let sql = `SELECT * , DATE_FORMAT(dob, '%Y-%m-%d') ISOdob, DATE_FORMAT(dod, '%Y-%m-%d') ISOdod
@@ -108,14 +156,14 @@ app.post(`/updateAuthor`, async (req, res) =>{
     res.redirect('/authors') // Display list of authors again.
 })
 
-app.get('/quotes', async (req,res) =>{
+app.get('/quotes', isUserAuthenticated, async (req,res) =>{
     let sql = `SELECT quoteId, quote
                 FROM quotes`;
     const [quotes] = await pool.query(sql)
     res.render('quotes.ejs', {quotes})
 })
 
-app.get('/updateQuote', async (req,res) =>{
+app.get('/updateQuote', isUserAuthenticated, async (req,res) =>{
     let quoteId = req.query.quoteId
     let sql = `SELECT *
                 FROM quotes WHERE quoteId = ?`;
