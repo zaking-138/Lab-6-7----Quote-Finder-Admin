@@ -34,6 +34,18 @@ const [rowsCategories] = await pool.query('SELECT DISTINCT category FROM `quotes
 app.get('/', (req, res) => {
     res.render('login.ejs')
 });
+// app.get('/test', async (req, res) =>{
+//     let accessToken = "48027fa6e5ae4e90a670bb831279bbe6"
+
+//     let response = await fetch('https://api.spotify.com/v1/search?q=remaster%2520track%3ADoxy%2520artist%3AMiles%2520Davis&type=album', {
+//         headers: {
+//             Authorization: 'Bearer' + accessToken
+//         }
+//     })
+//     let data = await response.json()
+//     console.log(data);
+//     res.redirect('/')
+// })
 app.post('/attemptLogin', async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
@@ -73,6 +85,21 @@ app.get('/home', isUserAuthenticated, (req, res) => {
     let name = req.session.fullName;
     res.render('home.ejs', {name})
 });
+
+app.get('/deleteAuthor', isUserAuthenticated, async(req, res) =>{
+    let deleteId = req.query.authorId
+    let sql = `DELETE FROM authors
+                WHERE authorId = ${deleteId}`
+    const [rows] = await pool.query(sql)
+    res.redirect('/authors')
+})
+app.get('/deleteQuote', isUserAuthenticated, async(req, res) =>{
+    let deleteId = req.query.quoteId
+    let sql = `DELETE FROM quotes
+                WHERE quoteId = ${deleteId}`
+    const [rows] = await pool.query(sql)
+    res.redirect('/quotes')
+})
 
 // Display form to add a new author to the database.
 app.get('/addAuthor', isUserAuthenticated, (req, res) => {
